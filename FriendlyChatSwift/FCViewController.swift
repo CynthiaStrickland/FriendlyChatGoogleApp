@@ -17,6 +17,7 @@
 import UIKit
 import Firebase
 import FirebaseAuthUI
+import FirebaseGoogleAuthUI
 
 // MARK: - FCViewController
 
@@ -68,6 +69,8 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     
     func configureAuth() {
         // TODO: configure firebase authentication
+        
+        FUIAuth.defaultAuthUI()?.providers = [FUIGoogleAuth()]
         _authHandle = FIRAuth.auth()?.addStateDidChangeListener({ (auth: FIRAuth, user: FIRUser?) in
             // refresh table data
             self.messages.removeAll(keepingCapacity: false)
@@ -110,6 +113,7 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     deinit {
         // TODO: set up what needs to be deinitialized when view is no longer being used
         ref.child("messages").removeObserver(withHandle: _refHandle)
+        FIRAuth.auth()?.removeStateDidChangeListener(_authHandle)
         
     }
     
@@ -148,7 +152,7 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     func loginSession() {
-        let authViewController = FUIAuth.defaultAuthUI()!.authViewController()
+        let authViewController = FUIAuth.defaultAuthUI()!.authViewController()   //default viewcontroller provided by Firebase
         self.present(authViewController, animated: true, completion: nil)
     }
     
