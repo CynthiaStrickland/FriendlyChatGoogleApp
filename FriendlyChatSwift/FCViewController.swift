@@ -70,7 +70,8 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     }
     
     func configureDatabase() {
-        // TODO: configure database to sync messages
+        // TODO: configure database to sync messages   Assuming user is signed in and this function is called.
+        ref = FIRDatabase.database().reference()  // This line of code connects that app to the database.  Gives a reference to our Firebase Database
     }
     
     func configureStorage() {
@@ -110,6 +111,8 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
             messageTextField.delegate = self
             
             // TODO: Set up app to send and receive messages when signed in
+            
+            configureDatabase()
         }
     }
     
@@ -122,6 +125,8 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     
     func sendMessage(data: [String:String]) {
         // TODO: create method that pushes message to the firebase database
+        ref.child("messages").childByAutoId().setValue(data)
+        
     }
     
     func sendPhotoMessage(photoData: Data) {
@@ -271,7 +276,8 @@ extension FCViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if !textField.text!.isEmpty {
-            let data = [Constants.MessageFields.text: textField.text! as String]
+            let data = [Constants.MessageFields.text: textField.text! as String]  //Assuming txt isn't empty message is packaged into a data dictionary.  Then passed to another function called sendMessage
+            
             sendMessage(data: data)
             textField.resignFirstResponder()
         }
