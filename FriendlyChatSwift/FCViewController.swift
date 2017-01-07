@@ -125,7 +125,9 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     
     func sendMessage(data: [String:String]) {
         // TODO: create method that pushes message to the firebase database
-        ref.child("messages").childByAutoId().setValue(data)
+        var mdata = data   //added a copy of data then added a key:value pair and the value is displayName
+        mdata[Constants.MessageFields.name] = displayName
+        ref.child("messages").childByAutoId().setValue(mdata)
         
     }
     
