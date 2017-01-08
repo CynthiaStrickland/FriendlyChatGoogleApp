@@ -171,6 +171,20 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     
     func sendPhotoMessage(photoData: Data) {
         // TODO: create method that pushes message w/ photo to the firebase database
+        let imagePath = "chat_photos/" + FIRAuth.auth()!.currentUser!.uid + "/\(Double(Date.timeIntervalSinceReferenceDate * 1000)).jpg"
+        let metadata = FIRStorageMetadata()
+        // Set content type to "image/jpeg" in Firebase Storage metadata
+        metadata.contentType = "image/jpeg"
+        // Create a child node at imagePath with photoData and metaData
+        storageRef!.child(imagePath).put(photoData, metadata: metadata) { (metadata, Error) in
+                if let error = Error {
+                print ("error uploading: \(error)")
+                return
+            }
+            //Use sendMessage to add imageURL to database
+            self.sendMessage(data: [Constants.MessageFields.imageUrl: self.storageRef!.child((metadata?.path)!).description])
+            
+        }
     }
     
     // MARK: Alert
@@ -250,13 +264,31 @@ extension FCViewController: UITableViewDelegate, UITableViewDataSource {
         let messageSnapshot: FIRDataSnapshot! = messages[indexPath.row]
         let message = messageSnapshot.value as! [String:String]
         let name = message[Constants.MessageFields.name] ?? "[username]"
-        let text = message[Constants.MessageFields.text] ?? "[message]"
         
-        cell!.textLabel?.text = name + ": " + text
-        cell!.imageView?.image = self.placeholderImage
-        
+        if let imageURL = message[Constants.MessageFields.imageUrl] {
+            cell.textLabel?.text = "sent by: \(name)"
+            //Download and display image
+        FIRStorage.storage().reference(forURL: imageURL).data(withMaxSize: INT64_MAX, completion: { (Data, Error) in
+                guard Error == nil else {
+                    print("Error Downloading: \(Error)")
+                    return
+            }
+            //Display Image
+            let messageImage = UIImage.init(data: Data!, scale: 50)
+            //Check if cell is still on screen if so update image
+            if cell == tableView.cellForRow(at: indexPath) {
+                DispatchQueue.main.async {
+                    cell.imageView?.image = messageImage
+                    cell.setNeedsLayout()
+                    }
+                }
+            })
+        } else {
+            let text = message[Constants.MessageFields.text] ?? "[messages]"
+            cell!.textLabel?.text = name + ": " + text
+            cell!.imageView?.image = self.placeholderImage
+            }
         return cell!
-        // TODO: update cell to display message data
     }
     
     func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
