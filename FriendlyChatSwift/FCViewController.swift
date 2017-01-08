@@ -108,6 +108,8 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
     
     func configureStorage() {
         // TODO: configure storage using your firebase storage
+        
+        storageRef = FIRStorage.storage().reference()
     }
     
     deinit {
@@ -148,6 +150,7 @@ class FCViewController: UIViewController, UINavigationControllerDelegate {
             // TODO: Set up app to send and receive messages when signed in
             
             configureDatabase()
+            configureStorage()
         }
     }
     
